@@ -1,0 +1,86 @@
+# OpenSpec 项目配置文件
+# 文档：https://github.com/Fission-AI/OpenSpec
+#
+# 本文件向 OpenSpec 注入项目级上下文，影响所有 AI 生成的工件质量。
+# context 字段会被注入到每个 Artifact 的生成指令中。
+# rules 字段约束各类 Artifact 的生成规则。
+#
+# 注意：context 大小限制为 50KB，保持简洁准确，不要堆砌无关信息。
+
+schema: spec-driven
+
+context: |
+  ## 项目背景
+
+  这是一个企业级 Java Spring Boot 后台服务，提供 RESTful API 供前端（Web/App）消费。
+
+  ## 技术栈
+
+  - Java 21（LTS）+ Spring Boot 3.x + Spring Framework 6.x
+  - MyBatis-Plus（数据访问，支持手写 XML SQL）
+  - MySQL 8.0（主数据库，软删除，`deleted` 字段标记）
+  - Redis 7.x（缓存 / 分布式锁 / 限流）
+  - Spring Security + JWT（认证授权）
+  - SpringDoc OpenAPI（接口文档，Swagger UI）
+  - Maven 3.9+（构建工具）
+  - Docker + Docker Compose（容器化）
+
+  ## 分层架构规范（严格执行）
+
+  Controller → Service（接口）→ ServiceImpl → Mapper → DB
+
+  - Controller 层：只做参数校验和响应包装，禁止写业务逻辑
+  - Service 层：业务逻辑的核心承载，事务管理
+  - Mapper 层：只做数据访问，禁止业务判断，禁止 ${} 拼接用户输入
+  - Entity/DO：对应数据库表，不做业务逻辑
+  - DTO/VO：用于层间传输和对外响应，不直接暴露 Entity
+
+  ## 重要约定
+
+  - 所有表使用软删除：`deleted = 0` 正常，`deleted = 1` 已删除
+  - 手写 SQL 必须显式加 `deleted = 0` 条件（MyBatis-Plus 自动注入不覆盖手写 SQL）
+  - `status = null` 与 `status = 0` 语义不等价，判断时必须显式处理 null
+  - 金额字段使用 `DECIMAL(10,2)`，Java 层用 `BigDecimal`，禁止 double/float
+  - 所有接口响应统一使用 `Result<T>` 包装
+  - 时间字段（created_at / updated_at）由数据库自动维护，代码层不手动设置
+  - 已上线接口响应字段只增不减（向后兼容）
+
+  ## 文档位置
+
+  - 架构总览：docs/architecture/index.md
+  - 隐性约定与坑点：docs/architecture/implicit-contracts.md（生成工件前必读）
+  - 测试规范：docs/standards/testing.md
+  - 数据库规范：docs/standards/database.md
+
+  ## 输出语言
+
+  所有生成的工件（proposal.md、design.md、tasks.md、spec.md）均使用中文输出。
+
+rules:
+  proposal:
+    - 说明需求背景和业务价值（为什么要做）
+    - 明确功能边界（做什么，不做什么）
+    - 列出对现有功能的影响
+    - 标注是否涉及数据库变更、接口变更、配置变更
+    - 第一版 proposal 往往只是草案，要提示用户人工审核后再继续
+
+  design:
+    - 必须包含：接口设计（HTTP 方法、路径、请求/响应结构）
+    - 必须包含：核心业务逻辑描述（伪代码或流程说明）
+    - 必须包含：数据库变更（新增/修改的表、字段、索引）
+    - 必须检查：是否与 implicit-contracts.md 中的隐性约定有冲突
+    - 必须说明：事务边界在哪里
+    - 对于复杂逻辑，给出关键代码的伪代码示例
+
+  tasks:
+    - 按 Spring Boot 分层顺序拆分：数据库层 → Mapper → Service → Controller → 测试
+    - 每个任务必须可独立执行（不依赖未完成的其他任务）
+    - 任务粒度适中：不要太粗（"实现业务逻辑"），也不要太细（"在第5行加一个分号"）
+    - 包含单元测试任务
+    - 数据库相关任务（DDL、SQL）单独列出，便于人工审查
+
+  spec:
+    - 描述"这个能力域是怎么工作的"（当前系统状态）
+    - 不描述"怎么实现的"（那是 design 的职责）
+    - 使用功能性语言，而不是技术实现语言
+    - 保持与实际代码一致，变更归档后及时更新

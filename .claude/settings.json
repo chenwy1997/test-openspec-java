@@ -1,0 +1,118 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn test)",
+      "Bash(mvn test -Dtest=*)",
+      "Bash(mvn -q -DskipTests compile)",
+      "Bash(mvn -DskipTests package)",
+      "Bash(mvn -DskipTests verify)",
+      "Bash(mvn dependency:tree)",
+      "Bash(mvn dependency:list)",
+      "Bash(mvn help:effective-pom)",
+      "Bash(mvn versions:display-dependency-updates)",
+      "Bash(java -version)",
+      "Bash(java --version)",
+      "Bash(git status)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git show*)",
+      "Bash(git branch*)",
+      "Bash(git stash list)",
+      "Bash(git tag*)",
+      "Bash(docker ps*)",
+      "Bash(docker images*)",
+      "Bash(docker logs*)",
+      "Bash(docker inspect*)",
+      "Bash(docker-compose ps*)",
+      "Bash(docker-compose logs*)",
+      "Bash(docker compose ps*)",
+      "Bash(docker compose logs*)",
+      "Bash(redis-cli ping)",
+      "Bash(redis-cli info*)",
+      "Bash(redis-cli keys*)",
+      "Bash(redis-cli get*)",
+      "Bash(redis-cli ttl*)",
+      "Bash(mysql -u* --execute=\"SHOW*\")",
+      "Bash(mysql -u* --execute=\"EXPLAIN*\")",
+      "Bash(curl -X GET*)",
+      "Bash(curl -s*)",
+      "Bash(cat*)",
+      "Bash(ls*)",
+      "Bash(find . -name*)",
+      "Bash(grep -r*)",
+      "Bash(wc -l*)",
+      "Bash(openspec list*)",
+      "Bash(openspec status*)",
+      "Bash(openspec show*)",
+      "Bash(openspec validate*)",
+      "Bash(openspec instructions*)",
+      "Bash(openspec new*)",
+      "Bash(openspec schema*)"
+    ],
+    "deny": [
+      "Bash(git push*)",
+      "Bash(git reset --hard*)",
+      "Bash(git clean -f*)",
+      "Bash(git rebase*)",
+      "Bash(git cherry-pick*)",
+      "Bash(kubectl*)",
+      "Bash(helm*)",
+      "Bash(terraform*)",
+      "Bash(ansible*)",
+      "Bash(rm -rf*)",
+      "Bash(docker push*)",
+      "Bash(docker run --rm* --privileged*)",
+      "Bash(docker-compose up*)",
+      "Bash(docker compose up*)",
+      "Bash(docker exec* -it*)",
+      "Bash(mysql -u* --execute=\"DROP*\")",
+      "Bash(mysql -u* --execute=\"DELETE*\")",
+      "Bash(mysql -u* --execute=\"TRUNCATE*\")",
+      "Bash(mysql -u* --execute=\"ALTER*\")",
+      "Bash(redis-cli flushall*)",
+      "Bash(redis-cli flushdb*)",
+      "Bash(redis-cli del*)",
+      "Bash(redis-cli set*)",
+      "Bash(ssh*)",
+      "Bash(scp*)",
+      "Bash(rsync*)",
+      "Bash(curl -X POST*)",
+      "Bash(curl -X PUT*)",
+      "Bash(curl -X DELETE*)",
+      "Bash(curl -X PATCH*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/guard_write.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/ensure_change_context.py"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/run_checks.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
