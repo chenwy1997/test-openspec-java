@@ -1,5 +1,5 @@
 <archetype>
-  <id>test-openspec</id>
+  <id>test-openspec-java</id>
   <sources>
     <source>src/main/java/App.java</source>
   </sources>

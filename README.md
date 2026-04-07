@@ -63,7 +63,7 @@
 ```bash
 # 1. 克隆项目
 git clone <repo-url>
-cd test-openspec
+cd test-openspec-java
 
 # 2. 编译检查
 mvn -q -DskipTests compile
