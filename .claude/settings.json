@@ -90,6 +90,10 @@
           {
             "type": "command",
             "command": "python3 .claude/hooks/guard_write.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/tiered_permission.py"
           }
         ]
       },
@@ -110,6 +114,15 @@
           {
             "type": "command",
             "command": "bash .claude/hooks/run_checks.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/hooks/update_memory.py"
           }
         ]
       }
