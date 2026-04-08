@@ -7,7 +7,7 @@
 ## 核心原则
 
 1. **没有 change 不开发**：所有代码变更必须在 OpenSpec change 工件存在的前提下进行
-2. **先看文档后改代码**：修改前必须阅读 `docs/architecture/implicit-contracts.md`
+2. **先看文档后改代码**：修改前必须阅读 `docs/architecture/implicit-contracts.md` 和 `MEMORY.md`
 3. **只做 tasks.md 范围内的事**：不自行扩需求，不做额外"优化"
 4. **每完成一个里程碑跑一次检查**：`mvn -q -DskipTests compile`
 
@@ -89,6 +89,7 @@ Controller → Service → ServiceImpl → Mapper → DB
 |------|------|
 | `AGENTS.md` | AI 入口导航地图 |
 | `REVIEW.md` | 只读评审代理提示词 |
+| `MEMORY.md` | **跨会话项目记忆（每次开工必读）** — 记录历次变更踩坑，自动维护 |
 | `docs/architecture/index.md` | 项目整体架构 |
 | `docs/architecture/implicit-contracts.md` | 隐性约定与坑点（必读） |
 | `docs/standards/database.md` | SQL 与数据库规范 |
@@ -100,7 +101,11 @@ Controller → Service → ServiceImpl → Mapper → DB
 
 本项目已集成以下能力（详见 `.claude/` 目录）：
 
-- **Hooks**：写入前保护（`guard_write.py`）、上下文检查（`ensure_change_context.py`）、写入后自动编译（`run_checks.sh`）
+- **Hooks**：
+  - PreToolUse 写入保护：`guard_write.py`（高风险路径阻断）+ `tiered_permission.py`（三档分级治理）
+  - PreToolUse Bash 检查：`ensure_change_context.py`（变更上下文检查）
+  - PostToolUse 写入后：`run_checks.sh`（Java 自动编译）
+  - PostToolUse Bash 后：`update_memory.py`（归档后自动更新 MEMORY.md）
 - **Skills**：`/prepare-review`、`/spring-architecture-review`、`/sql-risk-review`
 - **Agents**：`@reviewer`（只读评审子代理）
-- **OPSX 命令**：`/opsx:propose`、`/opsx:apply`、`/opsx:verify`、`/opsx:archive`
+- **OPSX 命令**：`/opsx:propose`、`/opsx:apply`、`/opsx:verify`、`/opsx:archive`、`/opsx:resume`（会话恢复）
