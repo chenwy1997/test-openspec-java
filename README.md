@@ -43,6 +43,7 @@
 │   └── restore-opsx-commands.sh  # 恢复 OpenSpec 中文命令
 ├── AGENTS.md                   # AI 导航地图
 ├── CLAUDE.md                   # Claude Code 系统提示
+├── MEMORY.md                   # 跨会话项目记忆（自动维护）
 └── REVIEW.md                   # 只读代码审查代理
 ```
 
@@ -51,6 +52,11 @@
 ```
 /opsx:explore  →  /opsx:propose  →  /opsx:apply  →  /opsx:verify  →  /opsx:archive
   （探索想法）      （生成工件）      （执行实现）     （验证一致性）     （归档变更）
+                                                                            ↓
+                                                                    MEMORY.md 自动更新
+
+# 中断后恢复上次工作
+/opsx:resume
 ```
 
 每个变更都会生成三份工件后再动一行代码：
@@ -82,12 +88,14 @@ mvn -q -DskipTests compile
 | 命令 | `/opsx:apply` | 按任务清单实现变更 |
 | 命令 | `/opsx:explore` | 进入思考探索模式 |
 | 命令 | `/opsx:archive` | 归档已完成的变更 |
+| 命令 | `/opsx:resume` | 恢复中断的会话，自动读取未完成任务续接执行 |
 | Skill | `/prepare-review` | 生成 PR 审查摘要 |
 | Skill | `/spring-architecture-review` | Spring Boot 分层架构检查 |
 | Skill | `/sql-risk-review` | SQL 风险检查 |
 | Agent | `@reviewer` | 只读代码审查子代理 |
-| Hook | 写入保护 | 防止 AI 误改配置/SQL/部署文件 |
+| Hook | 分级写入保护 | 三档权限治理（🔴阻断 / 🟡询问 / 🟢放行），防止误改关键文件 |
 | Hook | 编译检查 | Java 文件变更后自动触发 `mvn compile` |
+| Hook | 记忆更新 | 每次 `/opsx:archive` 后自动将变更摘要写入 `MEMORY.md` |
 
 ## 注意事项
 
